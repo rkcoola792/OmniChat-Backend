@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm install *)",
+      "Bash(node -e \"const r = require\\('./node_modules/pdf-parse/index.js'\\); console.log\\(typeof r, Object.keys\\(r\\)\\)\")",
+      "Bash(node -e \"const r = require\\('pdf-parse'\\); console.log\\(typeof r, typeof r.default\\)\")",
+      "Bash(node -e \"const r = require\\('pdf-parse'\\); console.log\\(typeof r\\)\")",
+      "Bash(node -e \"const {Pinecone} = require\\('@pinecone-database/pinecone'\\); console.log\\(require\\('@pinecone-database/pinecone/package.json'\\).version\\)\")"
+    ]
+  }
+}
