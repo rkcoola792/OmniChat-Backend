@@ -78,7 +78,7 @@ router.post("/login", async (req, res) => {
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
-    res.json({ user: { id: user._id, name: user.name, email: user.email } });
+    res.json({ userId: user._id, user: { id: user._id, name: user.name, email: user.email } });
   } catch (err) {
     console.error(err);
     res.status(500).json({ error: "Server error." });

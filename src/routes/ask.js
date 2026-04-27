@@ -1,12 +1,14 @@
 import { Router } from "express";
 import openai from "../config/openai.js";
 import { index } from "../config/pinecone.js";
+import Chat from "../models/chat.js";
+import { optionalAuth } from "../middleware/auth.js";
 
 const router = Router();
 
-router.post("/", async (req, res) => {
+router.post("/", optionalAuth, async (req, res) => {
   try {
-    const { question, history = [] } = req.body;
+    const { question, history = [], chatId } = req.body;
 
     const queryEmbedding = await openai.embeddings.create({
       model: "text-embedding-3-small",
@@ -62,16 +64,44 @@ router.post("/", async (req, res) => {
       messages,
     });
 
+    let fullResponse = "";
     for await (const chunk of stream) {
       const text = chunk.choices[0]?.delta?.content || "";
+      fullResponse += text;
       res.write(text);
     }
 
     res.write("\n\n__SOURCES__" + JSON.stringify(sources));
     res.end();
+
+    // Persist messages to the chat after streaming completes
+    if (chatId) {
+      if (!req.userId) {
+        console.warn("[ask] chatId provided but user not authenticated — cookie may be missing from streaming request");
+      } else {
+        const chat = await Chat.findOne({ _id: chatId, userId: req.userId });
+        if (!chat) {
+          console.warn("[ask] chat not found for chatId:", chatId, "userId:", req.userId);
+        } else {
+          chat.messages.push({ role: "user", content: question });
+          chat.messages.push({ role: "assistant", content: fullResponse, sources });
+
+          // Auto-title from the first user message
+          if (chat.title === "New Chat" && chat.messages.length <= 2) {
+            chat.title = question.slice(0, 60) + (question.length > 60 ? "..." : "");
+          }
+
+          await chat.save();
+        }
+      }
+    }
   } catch (error) {
     console.error(error);
-    res.status(500).end("Error processing request");
+    if (!res.headersSent) {
+      res.status(500).end("Error processing request");
+    } else {
+      res.end();
+    }
   }
 });
 

@@ -7,6 +7,7 @@ import authRouter from "./routes/auth.js";
 import uploadRouter from "./routes/upload.js";
 import embedRouter from "./routes/embed.js";
 import askRouter from "./routes/ask.js";
+import chatRouter from "./routes/chat.js";
 
 connectDB();
 
@@ -24,5 +25,6 @@ app.use("/auth", authRouter);
 app.use("/upload", uploadRouter);
 app.use("/embed", embedRouter);
 app.use("/ask-stream", askRouter);
+app.use("/chat", chatRouter);
 
 app.listen(5000, () => console.log("Server running"));
