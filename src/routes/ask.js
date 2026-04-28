@@ -48,10 +48,6 @@ router.post("/", optionalAuth, async (req, res) => {
         role: "system",
         content: "Answer ONLY from the provided context. If not found, say 'I don't know based on the provided documents.'",
       },
-      ...history.slice(-5).map((m) => ({
-        role: m.role === "ai" ? "assistant" : "user",
-        content: m.text,
-      })),
       {
         role: "user",
         content: `Context:\n${context}\n\nQuestion: ${question}`,
